@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use std::env;
-use std::fs::File;
-use std::io::BufReader;
+use std::fs::{File, OpenOptions};
+use std::io::{BufReader, Write, BufWriter};
 use std::error::Error;
 use walkdir::WalkDir;
 
@@ -19,6 +19,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     
     let directory = &args[1];
+
+    let output_file_path = format!("{}.txt", directory);
+    let output_file = OpenOptions::new().create(true).write(true).truncate(true).open(&output_file_path)?;
+    let mut writer = BufWriter::new(output_file);
+
+
     for entry in WalkDir::new(directory) {
         let entry = entry?;
         println!("{}", entry.path().display());
@@ -30,7 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             match serde_json::from_reader::<_, Vec<Message>>(reader) {
                 Ok(messages) => {
                     for message in messages {
-                        println!("{}", message.text);
+                        writeln!(&mut writer, "{}", message.text)?;
                     }
                 }
                 Err(e) => {
