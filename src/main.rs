@@ -29,18 +29,22 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     for entry in WalkDir::new(directory) {
         let entry = entry?;
-        if entry.file_type().is_file() && entry.path().extension().unwrap() == "json" {
-            let file = File::open(entry.path())?;
-            let reader = BufReader::new(file);
+        if entry.file_type().is_file() {
+            if let Some(extension) =entry.path().extension() { 
+                if extension =="json" {
+                    let file = File::open(entry.path())?;
+                    let reader = BufReader::new(file);
 
-            match serde_json::from_reader::<_, Vec<Message>>(reader) {
-                Ok(messages) => {
-                    for message in messages {
-                        writeln!(&mut writer, "{}", message.text)?;
+                    match serde_json::from_reader::<_, Vec<Message>>(reader) {
+                        Ok(messages) => {
+                            for message in messages {
+                                writeln!(&mut writer, "{}", message.text)?;
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error: {}", e);
+                        }
                     }
-                }
-                Err(e) => {
-                    eprintln!("Error: {}", e);
                 }
             }
         }
