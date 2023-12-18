@@ -18,8 +18,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let directory = &args[1];
-
-    let output_file_path = format!("{}.txt", directory);
+    let directory_path= std::path::Path::new(directory);
+    let directory_name = directory_path.file_name().unwrap().to_str().unwrap();
+    let output_file_path = format!("{}{}.txt", directory, directory_name);
     let output_file = OpenOptions::new()
         .create(true)
         .write(true)
